@@ -9,6 +9,9 @@ const API_BASE = import.meta.env.VITE_API_URL || "";
   const onLogout = async () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("roleCode");
+    localStorage.removeItem("role");
+    localStorage.removeItem("username");
 
     try {
       await fetch(`${API_BASE}/auth/logout`, {

@@ -25,6 +25,9 @@ function PageHeader({ showLogout = true, showAvatar = true, navLinks = [] }) {
       if (!res.ok) throw new Error("Logout failed");
       localStorage.removeItem("token");
       localStorage.removeItem("user");
+      localStorage.removeItem("roleCode");
+      localStorage.removeItem("role");
+      localStorage.removeItem("username");
       navigate("/", { replace: true });
     } catch (err) {
       console.error("Logout error:", err);
