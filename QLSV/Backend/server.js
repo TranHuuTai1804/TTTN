@@ -114,9 +114,12 @@ function getAuthUser(req) {
 }
 
 /* ==================== HELPER ASYNC + CRT GRADE SERVICE ==================== */
+const JAVA_CRYPTO_BASE =
+  process.env.JAVA_CRYPTO_BASE ||
+  "http://localhost:8080/internal/crypto";
 const JAVA_GRADE_CRT_BASE =
   process.env.JAVA_GRADE_CRT_BASE ||
-  "http://localhost:8080/internal/crypto/grade-crt";
+  `${JAVA_CRYPTO_BASE}/grade-crt`;
 
 function queryAsync(query, params = []) {
   return new Promise((resolve, reject) => {
@@ -1093,7 +1096,7 @@ sql.query(connectionString, spKhoa, async (err, rows) => {
 });
 
 async function callJavaBatch(list) {
-  const res = await fetch("http://localhost:8080/internal/crypto/process-batch", {
+  const res = await fetch(`${JAVA_CRYPTO_BASE}/process-batch`, {
       method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(list)
   });
   if (!res.ok) throw new Error("Java API error: " + res.status);
@@ -1101,7 +1104,7 @@ async function callJavaBatch(list) {
 }
 
 async function callJavaCalculateIndex(payload) {
-  const res = await fetch("http://localhost:8080/internal/crypto/calculate-index", {
+  const res = await fetch(`${JAVA_CRYPTO_BASE}/calculate-index`, {
     method: "POST", 
     headers: { "Content-Type": "application/json" }, 
     body: JSON.stringify(payload)
@@ -1111,7 +1114,7 @@ async function callJavaCalculateIndex(payload) {
 }
 
 async function callJavaCrypto(payload) {
-  const res = await fetch("http://localhost:8080/internal/crypto/process", {
+  const res = await fetch(`${JAVA_CRYPTO_BASE}/process`, {
     method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload)
   });
   if (!res.ok) throw new Error("Java service error");
@@ -1914,7 +1917,7 @@ app.post("/admin/nhap-diem", async (req, res) => {
       // =======================================================
 
       const primeRangeRes = await fetch(
-        "http://localhost:8080/internal/crypto/grade-crt/prime-range",
+        `${JAVA_GRADE_CRT_BASE}/prime-range`,
         {
           method: "POST",
           headers: {
@@ -2032,7 +2035,7 @@ app.post("/admin/nhap-diem", async (req, res) => {
       // =======================================================
 
       const encryptRes = await fetch(
-        "http://localhost:8080/internal/crypto/grade-crt/encrypt",
+        `${JAVA_GRADE_CRT_BASE}/encrypt`,
         {
           method: "POST",
           headers: {
@@ -2468,7 +2471,7 @@ app.post("/api/view-grades", async (req, res) => {
     // =========================================================
 
     const primeRangeRes = await fetch(
-      "http://localhost:8080/internal/crypto/grade-crt/prime-range",
+      `${JAVA_GRADE_CRT_BASE}/prime-range`,
       {
         method: "POST",
         headers: {
@@ -2570,7 +2573,7 @@ app.post("/api/view-grades", async (req, res) => {
     // =========================================================
 
     const javaResponse = await fetch(
-      "http://localhost:8080/internal/crypto/grade-crt/decrypt",
+      `${JAVA_GRADE_CRT_BASE}/decrypt`,
       {
         method: "POST",
         headers: {
@@ -2993,7 +2996,7 @@ app.post("/api/get-personal-key", (req, res) => {
     try {
       // --- Gọi Java tính primes_lop ---
       const step2Res = await fetch(
-        "http://localhost:8080/internal/crypto/process",
+        `${JAVA_CRYPTO_BASE}/process`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -3014,7 +3017,7 @@ app.post("/api/get-personal-key", (req, res) => {
       };
 
       const step3Res = await fetch(
-        "http://localhost:8080/internal/crypto/student-key",
+        `${JAVA_CRYPTO_BASE}/student-key`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
