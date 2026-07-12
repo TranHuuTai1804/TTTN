@@ -1299,6 +1299,33 @@ app.post("/login", (req, res) => {
     });
   });
 });
+
+app.post("/auth/logout", (req, res) => {
+  if (!req.session) return res.json({ success: true });
+
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("Lỗi đăng xuất:", err);
+      return res.status(500).json({ success: false, message: "Đăng xuất thất bại" });
+    }
+
+    res.clearCookie("connect.sid", { path: "/" });
+    return res.json({ success: true });
+  });
+});
+
+app.get("/auth/session", (req, res) => {
+  const user = req.session?.user;
+  if (!user) return res.status(401).json({ authenticated: false });
+
+  return res.json({
+    authenticated: true,
+    username: user.username || user.user,
+    roleCode: Number(user.role),
+    role: user.roleName,
+  });
+});
+
 // API lấy lịch sử đăng nhập: dùng ở Dashboard sinh viên
 app.get("/api/login-history", (req, res) => {
   if (!req.session?.user) {

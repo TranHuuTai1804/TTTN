@@ -1,0 +1,4 @@
+Backend/.env
+**/node_modules/
+**/dist/
+**/target/

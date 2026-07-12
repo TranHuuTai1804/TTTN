@@ -4,8 +4,6 @@ import { useNavigate, Outlet, NavLink } from "react-router-dom";
 function AdminSidebar() {
   const navigate = useNavigate();
 const API_BASE = import.meta.env.VITE_API_URL || "";
-  const roleName = String(localStorage.getItem("role") || "").trim().toUpperCase();
-  const isTeacher = ["GIANGVIEN", "GIẢNGVIÊN", "GV"].includes(roleName);
 
   const onLogout = async () => {
     localStorage.removeItem("token");
@@ -71,12 +69,10 @@ const API_BASE = import.meta.env.VITE_API_URL || "";
             <i className="fa-solid fa-graduation-cap" style={{ width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', color: '#ffffff' }}></i>
             <span style={{ color: '#ffffff' }}>Manage Grades</span>
           </NavLink>
-          {isTeacher && (
-            <NavLink to="/admin/logs" style={({ isActive }) => navLinkStyle(isActive)}>
-              <i className="fa-solid fa-file-lines" style={{ width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', color: '#ffffff' }}></i>
-              <span style={{ color: '#ffffff' }}>Encryption Key</span>
-            </NavLink>
-          )}
+          <NavLink to="/admin/logs" style={({ isActive }) => navLinkStyle(isActive)}>
+            <i className="fa-solid fa-file-lines" style={{ width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', color: '#ffffff' }}></i>
+            <span style={{ color: '#ffffff' }}>Encryption Key</span>
+          </NavLink>
         </nav>
 
         {/* Logout Button */}

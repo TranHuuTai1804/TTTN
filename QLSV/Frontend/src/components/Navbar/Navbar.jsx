@@ -21,6 +21,9 @@ const API_BASE = import.meta.env.VITE_API_URL || "";
       // Xóa localStorage (nếu có lưu thông tin user)
       localStorage.removeItem("token");
       localStorage.removeItem("user");
+      localStorage.removeItem("roleCode");
+      localStorage.removeItem("role");
+      localStorage.removeItem("username");
 
       // Điều hướng về trang đăng nhập
       navigate("/login", { replace: true });
