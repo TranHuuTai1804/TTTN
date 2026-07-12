@@ -1314,6 +1314,18 @@ app.post("/auth/logout", (req, res) => {
   });
 });
 
+app.get("/auth/session", (req, res) => {
+  const user = req.session?.user;
+  if (!user) return res.status(401).json({ authenticated: false });
+
+  return res.json({
+    authenticated: true,
+    username: user.username || user.user,
+    roleCode: Number(user.role),
+    role: user.roleName,
+  });
+});
+
 // API lấy lịch sử đăng nhập: dùng ở Dashboard sinh viên
 app.get("/api/login-history", (req, res) => {
   if (!req.session?.user) {
