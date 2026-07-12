@@ -48,6 +48,24 @@ services:
       context: ./java-crypto-service
     restart: unless-stopped
 
+  seed-grades:
+    image: qlsv-backend
+    command:
+      - node
+      - scripts/seedHistoricalEncryptedGrades_CRT.js
+      - --all
+      - --concurrency=30
+    environment:
+      SEED_TEACHER_PIN: ${SEED_TEACHER_PIN:-123456}
+      DB_CONNECTION_STRING: >-
+        Server=db,1433;Database=QLSV_AT;UID=sa;PWD=${MSSQL_SA_PASSWORD:-ChangeMe_123456!};Driver={ODBC Driver 18 for SQL Server};Encrypt=yes;TrustServerCertificate=yes;
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+      crypto:
+        condition: service_started
+    restart: "no"
+
   backend:
     build:
       context: ./Backend
@@ -59,7 +77,7 @@ services:
       DB_CONNECTION_STRING: >-
         Server=db,1433;Database=QLSV_AT;UID=sa;PWD=${MSSQL_SA_PASSWORD:-ChangeMe_123456!};Driver={ODBC Driver 18 for SQL Server};Encrypt=yes;TrustServerCertificate=yes;
     depends_on:
-      db-init:
+      seed-grades:
         condition: service_completed_successfully
       crypto:
         condition: service_started
