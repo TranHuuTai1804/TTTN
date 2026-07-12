@@ -11,11 +11,12 @@ const fetch = (...args) =>
 
 /* ---------- 1. Kết nối SQL (Windows Auth, ODBC 17) ---------- */
 const connectionString =
-  "Server=localhost\\SQLEXPRESS;"+
-  "Database=QLSV_AT;" +
-  "Trusted_Connection=Yes;" +
-  "Driver={ODBC Driver 17 for SQL Server};" +
-  "Encrypt=no;TrustServerCertificate=yes;";
+  process.env.DB_CONNECTION_STRING ||
+  "Server=localhost\\SQLEXPRESS;" +
+    "Database=QLSV_AT;" +
+    "Trusted_Connection=Yes;" +
+    "Driver={ODBC Driver 17 for SQL Server};" +
+    "Encrypt=no;TrustServerCertificate=yes;";
 
 /* ==================== CÁC HÀM TIỆN ÍCH CRYPTO ==================== */
 
@@ -113,7 +114,9 @@ function getAuthUser(req) {
 }
 
 /* ==================== HELPER ASYNC + CRT GRADE SERVICE ==================== */
-const JAVA_GRADE_CRT_BASE = "http://localhost:8080/internal/crypto/grade-crt";
+const JAVA_GRADE_CRT_BASE =
+  process.env.JAVA_GRADE_CRT_BASE ||
+  "http://localhost:8080/internal/crypto/grade-crt";
 
 function queryAsync(query, params = []) {
   return new Promise((resolve, reject) => {
@@ -1174,7 +1177,7 @@ app.use(
 app.use(express.json());
 app.use(
   session({
-    secret: "your-session-secret",
+    secret: process.env.SESSION_SECRET || "your-session-secret",
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false },

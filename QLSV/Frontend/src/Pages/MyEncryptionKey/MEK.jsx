@@ -48,7 +48,7 @@ function EncryptionKey() {
       setLogsLoading(true);
       setLogsError("");
 
-      const res = await fetch("http://localhost:3000/api/pin-change-history", {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/pin-change-history`, {
         method: "GET",
         credentials: "include"
       });
@@ -93,7 +93,7 @@ function EncryptionKey() {
       setLoading(true);
 
       const res = await fetch(
-        "http://localhost:3000/api/set-pin",
+        `${import.meta.env.VITE_API_URL || ""}/api/set-pin`,
         {
           method: "POST",
           headers: {

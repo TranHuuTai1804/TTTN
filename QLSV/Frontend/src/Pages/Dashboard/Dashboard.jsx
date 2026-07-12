@@ -22,7 +22,7 @@ function Dashboard() {
       setErr("");
 
       try {
-        const res = await fetch("http://localhost:3000/student", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/student`, {
           credentials: "include",
         });
 
@@ -47,7 +47,7 @@ function Dashboard() {
   useEffect(() => {
     const fetchLoginHistory = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/login-history?t=${Date.now()}`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || ""}/api/login-history?t=${Date.now()}`, {
           method: "GET",
           credentials: "include",
         });
