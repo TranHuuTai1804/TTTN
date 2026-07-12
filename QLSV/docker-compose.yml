@@ -1,0 +1,68 @@
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Express
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-ChangeMe_123456!}
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$${MSSQL_SA_PASSWORD}" -C -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    restart: unless-stopped
+
+  db-init:
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-ChangeMe_123456!}
+    volumes:
+      - ./Backend/QLSV_AT.sql:/init/QLSV_AT.sql:ro
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - >-
+        /opt/mssql-tools/bin/sqlcmd -S db -U sa -P "$${MSSQL_SA_PASSWORD}"
+        -i /init/QLSV_AT.sql
+    restart: "no"
+
+  crypto:
+    build:
+      context: ./java-crypto-service
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./Backend
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      SESSION_SECRET: ${SESSION_SECRET:-replace-this-session-secret}
+      JAVA_GRADE_CRT_BASE: http://crypto:8080/internal/crypto/grade-crt
+      DB_CONNECTION_STRING: >-
+        Server=db,1433;Database=QLSV_AT;UID=sa;PWD=${MSSQL_SA_PASSWORD:-ChangeMe_123456!};Driver={ODBC Driver 18 for SQL Server};Encrypt=yes;TrustServerCertificate=yes;
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+      crypto:
+        condition: service_started
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./Frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    restart: unless-stopped
+
+volumes:
+  sqlserver_data:

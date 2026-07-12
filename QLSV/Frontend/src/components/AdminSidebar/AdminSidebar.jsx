@@ -3,7 +3,7 @@ import { useNavigate, Outlet, NavLink } from "react-router-dom";
 
 function AdminSidebar() {
   const navigate = useNavigate();
-  const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_BASE = import.meta.env.VITE_API_URL || "";
   const roleName = String(localStorage.getItem("role") || "").trim().toUpperCase();
   const isTeacher = ["GIANGVIEN", "GIẢNGVIÊN", "GV"].includes(roleName);
 

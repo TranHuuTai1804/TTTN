@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./PersonalInfo.css";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
+const API_BASE = import.meta.env.VITE_API_URL || "";
 
 function PersonalInfo() {
   const [profile, setProfile] = useState({

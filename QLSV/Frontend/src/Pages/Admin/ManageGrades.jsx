@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 import Pagination from "../../components/Pagination/Pagination";
 
 const ITEMS_PER_PAGE = 5;
-const API_BASE = "http://localhost:3000";
+const API_BASE = import.meta.env.VITE_API_URL || "";
 const CURRENT_GRADE_YEAR = "2025-2026";
 const CURRENT_GRADE_SEMESTER = 2;
 

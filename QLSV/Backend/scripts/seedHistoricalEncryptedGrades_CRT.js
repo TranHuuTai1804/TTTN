@@ -16,7 +16,7 @@
   - Không dùng một PIN chung một cách mù quáng cho mọi giảng viên.
   - Kiểm tra PIN được cung cấp có khớp GIANG_VIEN.PIN_HASH hay không.
   - Kiểm tra PUBLIC_KEY giảng viên có đúng G^PIN mod P hay không.
-  - Lưu START_INDEX, END_INDEX, ngữ cảnh mã hóa và phiên bản thuật toán vào DIEM_CRT.
+  - START_INDEX, END_INDEX chỉ được tính trong bộ nhớ và không lưu vào DIEM_CRT.
   - Mặc định bỏ qua 2025-2026 HK2 để giảng viên import trên giao diện.
   - Không lưu GK/CK/TB dạng rõ trong database.
 
@@ -130,8 +130,6 @@ async function columnExists(tableName, columnName) {
 
 async function getMetadata() {
   return {
-    diemHasStartIndex: await columnExists("DIEM_CRT", "START_INDEX"),
-    diemHasEndIndex: await columnExists("DIEM_CRT", "END_INDEX"),
     diemHasNamHoc: await columnExists("DIEM_CRT", "NamHoc"),
     diemHasHocKy: await columnExists("DIEM_CRT", "HocKy"),
     diemHasHocky: await columnExists("DIEM_CRT", "HOCKY"),
@@ -382,7 +380,7 @@ async function deleteExistingGrade(row, metadata) {
   await queryAsync(`DELETE FROM dbo.DIEM_CRT WHERE ${whereSql}`, params);
 }
 
-async function insertGrade(row, cValue, startIndex, endIndex, metadata) {
+async function insertGrade(row, cValue, metadata) {
   const columns = ["MASV", "MAHP", "MAGV", "C"];
   const values = [row.MASV, row.MAHP, row.MaGV, cValue];
 
@@ -393,8 +391,6 @@ async function insertGrade(row, cValue, startIndex, endIndex, metadata) {
     }
   };
 
-  add(metadata.diemHasStartIndex, "START_INDEX", startIndex);
-  add(metadata.diemHasEndIndex, "END_INDEX", endIndex);
   add(metadata.diemHasNamHoc, "NamHoc", row.NamHoc);
   if (metadata.diemHasHocKy) add(true, "HocKy", Number(row.HocKy));
   else add(metadata.diemHasHocky, "HOCKY", Number(row.HocKy));
@@ -444,7 +440,7 @@ async function processOne(row, metadata) {
 
   if (DRY_RUN) return "dry-run";
   if (exists && FORCE) await deleteExistingGrade(row, metadata);
-  await insertGrade(row, cValue, startIndex, endIndex, metadata);
+  await insertGrade(row, cValue, metadata);
   return "inserted";
 }
 
@@ -498,10 +494,6 @@ async function main() {
 
   const metadata = await getMetadata();
   console.log("Schema DIEM_CRT:", metadata);
-
-  if (!metadata.diemHasStartIndex || !metadata.diemHasEndIndex) {
-    throw new Error("DIEM_CRT chưa có START_INDEX/END_INDEX. Hãy chạy file SQL tổng mới trước.");
-  }
 
   const totalRows = await queryAsync(`SELECT COUNT(*) AS total FROM dbo.THOI_KHOA_BIEU`);
   const rows = await loadTargetRows();
