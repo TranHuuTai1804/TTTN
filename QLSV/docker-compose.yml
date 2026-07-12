@@ -30,9 +30,9 @@ services:
     command:
       - >-
         if /opt/mssql-tools/bin/sqlcmd -S db -U sa -P "$${MSSQL_SA_PASSWORD}"
-        -d QLSV_AT -h -1 -W -Q
-        "SET NOCOUNT ON; IF OBJECT_ID(N'dbo.DOCKER_INIT_COMPLETE', N'U') IS NOT NULL SELECT 1 ELSE SELECT 0"
-        2>/dev/null | grep -q '^1$$'; then
+        -b -d QLSV_AT -Q
+        "IF OBJECT_ID(N'dbo.DOCKER_INIT_COMPLETE', N'U') IS NULL THROW 51000, 'DATABASE_NOT_INITIALIZED', 1;"
+        >/dev/null 2>&1; then
           echo "QLSV_AT was already initialized; skipping SQL import.";
         else
           /opt/mssql-tools/bin/sqlcmd -S db -U sa -P "$${MSSQL_SA_PASSWORD}"
