@@ -14,6 +14,7 @@ import StudentSidebar from "./components/StudentSidebar/StudentSidebar.jsx";
 import NotFoundPage from "./Pages/Error/NotFoundPage.jsx";
 import GeneralErrorPage from "./Pages/Error/GeneralErrorPage.jsx";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary.jsx";
+import RequireAuth from "./components/RequireAuth.jsx";
 
 // Admin pages
 import AdminSidebar from "./components/AdminSidebar/AdminSidebar.jsx";
@@ -33,24 +34,28 @@ export default function App() {
           <Route path="/login" element={<Login />} />
 
           {/* ===== STUDENT ===== */}
-          <Route path="/student" element={<StudentSidebar />}>
-            <Route index element={<Dashboard />} />
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="academic" element={<Academic />} />
-            <Route path="personal-info" element={<PersonalInfo />} />
-            <Route path="encryption-key" element={<EncryptionKey />} />
+          <Route element={<RequireAuth allowedRoleCodes={[0]} />}>
+            <Route path="/student" element={<StudentSidebar />}>
+              <Route index element={<Dashboard />} />
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="academic" element={<Academic />} />
+              <Route path="personal-info" element={<PersonalInfo />} />
+              <Route path="encryption-key" element={<EncryptionKey />} />
+            </Route>
           </Route>
 
           {/* ===== ERROR PAGES ===== */}
           <Route path="/error" element={<GeneralErrorPage />} />
 
           {/* ===== ADMIN ===== */}
-          <Route path="/admin" element={<AdminSidebar />}>
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="management-key" element={<ManagementKey />} />
-            <Route path="students" element={<ManageStudentInformation />} />
-            <Route path="grades" element={<ManageGrades />} />
-            <Route path="logs" element={<AdminEncryptionKey />} />
+          <Route element={<RequireAuth allowedRoleCodes={[1]} />}>
+            <Route path="/admin" element={<AdminSidebar />}>
+              <Route path="dashboard" element={<AdminDashboard />} />
+              <Route path="management-key" element={<ManagementKey />} />
+              <Route path="students" element={<ManageStudentInformation />} />
+              <Route path="grades" element={<ManageGrades />} />
+              <Route path="logs" element={<AdminEncryptionKey />} />
+            </Route>
           </Route>
 
           {/* ===== 404 ===== */}
