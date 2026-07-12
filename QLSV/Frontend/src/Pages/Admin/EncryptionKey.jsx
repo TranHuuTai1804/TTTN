@@ -108,7 +108,13 @@ function AdminEncryptionKey() {
         }),
       });
 
-      const data = await res.json();
+      const responseText = await res.text();
+      let data = {};
+      try {
+        data = responseText ? JSON.parse(responseText) : {};
+      } catch {
+        data = { message: responseText || `Máy chủ trả về lỗi HTTP ${res.status}` };
+      }
 
       if (!res.ok) {
         setMsg(data.message || "Cập nhật PIN giảng viên thất bại");
@@ -128,7 +134,7 @@ function AdminEncryptionKey() {
       setLoading(false);
     } catch (error) {
       console.error(error);
-      setMsg("Lỗi server khi đổi PIN giảng viên");
+      setMsg(error.message || "Lỗi kết nối server khi đổi PIN giảng viên");
       setLoading(false);
     }
   };
