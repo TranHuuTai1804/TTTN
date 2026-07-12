@@ -29,8 +29,18 @@ services:
     entrypoint: ["/bin/bash", "-c"]
     command:
       - >-
-        /opt/mssql-tools/bin/sqlcmd -S db -U sa -P "$${MSSQL_SA_PASSWORD}"
-        -i /init/QLSV_AT.sql
+        if /opt/mssql-tools/bin/sqlcmd -S db -U sa -P "$${MSSQL_SA_PASSWORD}"
+        -d QLSV_AT -h -1 -W -Q
+        "SET NOCOUNT ON; IF OBJECT_ID(N'dbo.DOCKER_INIT_COMPLETE', N'U') IS NOT NULL SELECT 1 ELSE SELECT 0"
+        2>/dev/null | grep -q '^1$$'; then
+          echo "QLSV_AT was already initialized; skipping SQL import.";
+        else
+          /opt/mssql-tools/bin/sqlcmd -S db -U sa -P "$${MSSQL_SA_PASSWORD}"
+          -b -i /init/QLSV_AT.sql &&
+          /opt/mssql-tools/bin/sqlcmd -S db -U sa -P "$${MSSQL_SA_PASSWORD}"
+          -b -d QLSV_AT -Q
+          "CREATE TABLE dbo.DOCKER_INIT_COMPLETE (ID TINYINT NOT NULL PRIMARY KEY CHECK (ID = 1), INITIALIZED_AT DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()); INSERT INTO dbo.DOCKER_INIT_COMPLETE (ID) VALUES (1);";
+        fi
     restart: "no"
 
   crypto:
