@@ -26,17 +26,32 @@ services:
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-ChangeMe_123456!}
     volumes:
       - ./Backend/QLSV_AT.sql:/init/QLSV_AT.sql:ro
-    entrypoint: ["/bin/bash", "-c"]
-    command:
-      - >-
-        /opt/mssql-tools/bin/sqlcmd -S db -U sa -P "$${MSSQL_SA_PASSWORD}"
-        -i /init/QLSV_AT.sql
+      - ./Backend/scripts/initDatabase.sh:/init/initDatabase.sh:ro
+    entrypoint: ["/bin/bash", "/init/initDatabase.sh"]
     restart: "no"
 
   crypto:
     build:
       context: ./java-crypto-service
     restart: unless-stopped
+
+  seed-grades:
+    image: qlsv-backend
+    command:
+      - node
+      - scripts/seedHistoricalEncryptedGrades_CRT.js
+      - --all
+      - --concurrency=30
+    environment:
+      SEED_TEACHER_PIN: ${SEED_TEACHER_PIN:-123456}
+      DB_CONNECTION_STRING: >-
+        Server=db,1433;Database=QLSV_AT;UID=sa;PWD=${MSSQL_SA_PASSWORD:-ChangeMe_123456!};Driver={ODBC Driver 18 for SQL Server};Encrypt=yes;TrustServerCertificate=yes;
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+      crypto:
+        condition: service_started
+    restart: "no"
 
   backend:
     build:
@@ -45,11 +60,12 @@ services:
       PORT: 3000
       NODE_ENV: production
       SESSION_SECRET: ${SESSION_SECRET:-replace-this-session-secret}
+      JAVA_CRYPTO_BASE: http://crypto:8080/internal/crypto
       JAVA_GRADE_CRT_BASE: http://crypto:8080/internal/crypto/grade-crt
       DB_CONNECTION_STRING: >-
         Server=db,1433;Database=QLSV_AT;UID=sa;PWD=${MSSQL_SA_PASSWORD:-ChangeMe_123456!};Driver={ODBC Driver 18 for SQL Server};Encrypt=yes;TrustServerCertificate=yes;
     depends_on:
-      db-init:
+      seed-grades:
         condition: service_completed_successfully
       crypto:
         condition: service_started
